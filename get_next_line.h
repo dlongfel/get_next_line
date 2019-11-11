@@ -6,32 +6,22 @@
 /*   By: dlongfel <dlongfel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/21 17:13:56 by dlongfel          #+#    #+#             */
-/*   Updated: 2019/10/07 19:37:30 by dlongfel         ###   ########.fr       */
+/*   Updated: 2019/11/11 20:50:16 by dlongfel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
-
-# include <fcntl.h>
-# include <sys/types.h>
-# include <unistd.h>
-# include <stdlib.h>
-#include <stdio.h>
+# include <stdio.h>
 # include "libft/libft.h"
+# include <fcntl.h>
+# define BUFF_SIZE 10000
 
-# define BUFF_SIZE 7
-
-typedef struct		s_arr
+typedef	struct	s_gnl
 {
 	int				fd;
-	char			*rest;
-	struct s_arr	*next;
-}					t_arr;
-
-t_arr				*ft_newlist(const int fd);
-char				*checkrest(char **p_n, char *rest);
-int					get_line(const int fd, char **line, char *rest);
-int		get_next_line(int const fd, char **line);
+	char			*segment;
+	struct s_gnl	*next;
+}				t_gnl;
 
 #endif

@@ -6,55 +6,85 @@
 /*   By: dlongfel <dlongfel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/21 17:14:23 by dlongfel          #+#    #+#             */
-/*   Updated: 2019/10/07 19:37:41 by dlongfel         ###   ########.fr       */
+/*   Updated: 2019/11/11 20:47:03 by dlongfel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	get_line(const int fd, char **line, char *rest)
+char	*ch_segment(char *segment, char **line)
+{
+	char	*pointer;
+
+	pointer = NULL;
+	if (segment)
+		if ((pointer = ft_strchr(segment, '\n')))
+		{
+			*pointer = '\0';
+			*line = ft_strdup(segment);
+			ft_strcpy(segment, ++pointer);
+		}
+		else
+		{
+			*line = ft_strdup(segment);
+			ft_strclr(segment);
+		}
+	else
+		*line = ft_strnew(1);
+	return (pointer);
+}
+
+int		join_line(const int fd, char **line, char **segment)
 {
 	char	buf[BUFF_SIZE + 1];
-	char	*p_n;
+	char	*pointer;
+	int		was_read;
 	char	*tmp;
-	int		rd;
 
-	p_n = NULL;
-	rd = 1;
-	*line = checkrest(&p_n, rest);
-	while (p_n == 0 && ((rd = read(fd, buf, BUFF_SIZE)) != 0))
+	if (!line || fd < 0 || read(fd, buf, 0) < 0)
+		return (-1);
+	pointer = ch_segment(*segment, line);
+	while (!pointer && (was_read = read(fd, buf, BUFF_SIZE)))
 	{
-		buf[rd] = '\0';
-		if ((p_n == ft_strchr(buf, '\n')) != NULL)
+		buf[was_read] = '\0';
+		if ((pointer = ft_strchr(buf, '\n')))
 		{
-			ft_strcpy(rest, ++p_n);
-			ft_strclr(--p_n);
+			*pointer = '\0';
+			*segment = ft_strdup(++pointer);
 		}
+		else
+			*segment = "\0";
 		tmp = *line;
-		if (!(*line = ft_strchr(buf, '\n')) != NULL)
-			return (-1);
+		*line = ft_strjoin(*line, buf);
 		ft_strdel(&tmp);
 	}
-	return ((ft_strlen(*len) || ft_strlen(rest) || rd) ? 1: 0);
+	return (was_read || ft_strlen(*segment) || (ft_strlen(*line))) ? 1 : 0;
 }
 
-int		get_next_line(int const fd, char **line)
+t_gnl	*add_list(const int fd)
 {
-	static t_arr	*list;
-	t_arr			*tmp;
-	int				ret;
+	t_gnl	*new;
 
-	if (fd < 0 || line == 0)
-		return (-1);
-	if (!list)
-		list = newlist(fd);
-	tmp = list;
+	if (!(new = (t_gnl *)malloc(sizeof(t_gnl))))
+		return (NULL);
+	new->fd = fd;
+	new->segment = NULL;
+	new->next = NULL;
+	return (new);
+}
+
+int		get_next_line(const int fd, char **line)
+{
+	static t_gnl	*first;
+	t_gnl			*tmp;
+
+	if (first == NULL)
+		first = add_list(fd);
+	tmp = first;
 	while (tmp->fd != fd)
 	{
-		if (tmp->next == NULL)
-			tmp->next = newlist(fd);
-		tmp = tmp->rest;
+		if (!tmp->next)
+			tmp->next = add_list(fd);
+		tmp = tmp->next;
 	}
-	ret = get_line(fd, line, tmp->rest);
-	return (ret);
-}
+	return (join_line(tmp->fd, line, &tmp->segment));
