@@ -6,7 +6,7 @@
 /*   By: dlongfel <dlongfel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/21 17:14:23 by dlongfel          #+#    #+#             */
-/*   Updated: 2019/11/11 20:47:03 by dlongfel         ###   ########.fr       */
+/*   Updated: 2019/11/16 20:47:11 by dlongfel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,3 +88,4 @@ int		get_next_line(const int fd, char **line)
 		tmp = tmp->next;
 	}
 	return (join_line(tmp->fd, line, &tmp->segment));
+}
